@@ -9,7 +9,9 @@ import java.util.Scanner;
 public class Parser {
     public static void main(String[] args) throws IOException {
         List<String> query = new ArrayList<>();
-        List<String> waitingTime = new ArrayList<>();
+        List<String> waitingTimeLine = new ArrayList<>();
+        String checkQuery = "";
+        String checkWaitingTimeLine = "";
 
         try {
             String text = Files.readString(Paths.get("D:\\analytical_tool\\data.txt"));
@@ -27,8 +29,21 @@ public class Parser {
                 }
 
                 if (s.startsWith("C")) {
-                    waitingTime.add(s);
+                    waitingTimeLine.add(s);
                 }
+            }
+
+            List<String> updatedQuery = new ArrayList<>();
+            List<String> updatedWaitingTimeLine = new ArrayList<>();
+
+            for (String s : query) {
+                checkQuery = s.substring(s.indexOf(' ') + 1);
+                updatedQuery.add(checkQuery);
+            }
+
+            for (String w : waitingTimeLine) {
+                checkWaitingTimeLine = w.substring(w.indexOf(' ') + 1);
+                updatedWaitingTimeLine.add(checkWaitingTimeLine);
             }
 
             myReader.close();
