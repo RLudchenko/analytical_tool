@@ -1,4 +1,4 @@
-public class Query {
+public class C {
     private String name;
 
     public String getName() {
