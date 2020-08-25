@@ -28,23 +28,38 @@ public class Parser {
             e.printStackTrace();
         }
 
-        String checkD = "";
-        String checkC = "";
-
         for (int i = 0; i < splitter.length; i++) {
+            int sum = 0;
+            int count = 0;
+            int average;
             if (splitter[i][0].contains("D")) {
-                for (String s : splitter[i]) {
-                    System.out.print(s + " ");
-                }
                 for (int j = 0; j < i; j++) {
                     if (splitter[j][0].contains("C")) {
-                        for (String s : splitter[j]) {
-
+                        if (splitter[i][1].equals(splitter[j][1].substring(0, 1))
+                                && splitter[i][2].equals(splitter[j][2].substring(0, 1))
+                                || splitter[i][2].equals("*")) {
+                            count++;
+                            sum += Integer.parseInt(splitter[j][splitter[j].length - 1]);
+                            continue;
                         }
-                        System.out.println();
+
+                        if (splitter[i][1].equals(splitter[j][1])
+                                && splitter[i][2].equals(splitter[j][2].substring(0, 1))) {
+                            count++;
+                            sum += Integer.parseInt(splitter[j][splitter[j].length - 1]);
+                        }
                     }
+                }
+
+                if (count > 1) {
+                    average = sum / count;
+                    System.out.println(average);
+                } else {
+                    System.out.println(sum);
                 }
             }
         }
     }
 }
+
+
