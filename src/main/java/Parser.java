@@ -43,12 +43,18 @@ public class Parser {
             String dateDStart = "";
             String dateDEnd = "";
             String dateC = "";
+            String oneDateCheckD = "";
 
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 
             LocalDate ddateS = LocalDate.now();
             LocalDate ddateE = LocalDate.now();
+            LocalDate oneDateCheck = LocalDate.now();
             LocalDate cdateInit;
+
+            if (splitter[i][0] == null) {
+                break;
+            }
 
             if (splitter[i][0].contains("D")) {
                 for (int j = 0; j < i; j++) {
@@ -60,25 +66,31 @@ public class Parser {
                             dateDEnd = split[1];
                             ddateE = LocalDate.parse(dateDEnd, formatter);
                         }
+                    } else {
+                        oneDateCheckD = splitter[i][4];
+                        oneDateCheck = LocalDate.parse(oneDateCheckD, formatter);
                     }
 
                     if (splitter[j][0].contains("C")) {
                         dateC = splitter[j][4];
                         cdateInit = LocalDate.parse(dateC, formatter);
-                        if ((splitter[i][1].equals(splitter[j][1].substring(0, 1))
+
+                        if (((splitter[i][1].equals(splitter[j][1].substring(0, 1))
+                                && (dateCheck(ddateS, ddateE, cdateInit) || singleDateCheck(cdateInit, oneDateCheck)))
                                 || splitter[i][1].equals("*")
                                 || splitter[j][1].equals("*"))
-                                && (splitter[i][2].equals(splitter[j][2].substring(0, 1))
+                                || splitter[i][2].equals(splitter[j][2].substring(0, 2))
+                                && ((splitter[i][2].equals(splitter[j][2].substring(0, 1))
                                 || splitter[i][2].equals("*")
-                                || splitter[j][2].equals("*"))
-                                && ddateS.compareTo(cdateInit) * cdateInit.compareTo(ddateE) > 0) {
+                                || splitter[j][2].equals("*")))) {
                             count++;
                             sum += Integer.parseInt(splitter[j][splitter[j].length - 1]);
                             continue;
                         }
 
                         if (splitter[i][1].equals(splitter[j][1])
-                                && splitter[i][2].equals(splitter[j][2].substring(0, 1))) {
+                                && splitter[i][2].equals(splitter[j][2].substring(0, 1))
+                                && dateCheck(ddateS, ddateE, cdateInit)) {
                             count++;
                             sum += Integer.parseInt(splitter[j][splitter[j].length - 1]);
                         }
@@ -95,5 +107,15 @@ public class Parser {
                 }
             }
         }
+    }
+
+    public static boolean dateCheck(LocalDate ddateS, LocalDate ddateE, LocalDate cdateInit) {
+        if (ddateS.compareTo(cdateInit) * cdateInit.compareTo(ddateE) > 0) {
+            return true;
+        } else return cdateInit.equals(ddateS) || cdateInit.equals(ddateE);
+    }
+
+    public static boolean singleDateCheck(LocalDate cdateInit, LocalDate oneDateCheck) {
+        return cdateInit.equals(oneDateCheck);
     }
 }
