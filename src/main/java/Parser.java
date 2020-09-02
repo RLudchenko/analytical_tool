@@ -76,9 +76,12 @@ public class Parser {
                         cdateInit = LocalDate.parse(dateC, formatter);
 
                         if (splitter[j][2].length() > 1) {
-                            if (((splitter[i][1].equals(splitter[j][1].substring(0, 1))
-                                    && (dateCheck(ddateS, ddateE, cdateInit)
-                                    || singleDateCheck(cdateInit, oneDateCheck)))
+                            if (!dateCheck(ddateS, ddateE, cdateInit)
+                                    && !singleDateCheck(cdateInit, oneDateCheck)) {
+                                continue;
+                            }
+
+                            if ((splitter[i][1].equals(splitter[j][1].substring(0, 1))
                                     || splitter[i][1].equals("*")
                                     || splitter[j][1].equals("*"))
                                     || splitter[i][2].equals(splitter[j][2].substring(0, 2))
