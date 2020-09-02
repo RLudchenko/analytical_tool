@@ -2,14 +2,17 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 public class Parser {
-    public static void main(String[] args) throws IOException, ParseException {
-        String line = "";
+    public static void main(String[] args) {
         String path = "D:\\analytical_tool\\data.txt";
+        readFromFile(path);
+    }
+
+    public static void readFromFile(String path) {
+        String line = "";
 
         String[][] splitter = new String[7][6];
         int currentLine = 0;
@@ -94,5 +97,3 @@ public class Parser {
         }
     }
 }
-
-
