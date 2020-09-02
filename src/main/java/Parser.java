@@ -75,18 +75,20 @@ public class Parser {
                         dateC = splitter[j][4];
                         cdateInit = LocalDate.parse(dateC, formatter);
 
-                        if (((splitter[i][1].equals(splitter[j][1].substring(0, 1))
-                                && (dateCheck(ddateS, ddateE, cdateInit)
-                                || singleDateCheck(cdateInit, oneDateCheck)))
-                                || splitter[i][1].equals("*")
-                                || splitter[j][1].equals("*"))
-                                || splitter[i][2].equals(splitter[j][2].substring(0, 2))
-                                && ((splitter[i][2].equals(splitter[j][2].substring(0, 1))
-                                || splitter[i][2].equals("*")
-                                || splitter[j][2].equals("*")))) {
-                            count++;
-                            sum += Integer.parseInt(splitter[j][splitter[j].length - 1]);
-                            continue;
+                        if (splitter[j][2].length() > 1) {
+                            if (((splitter[i][1].equals(splitter[j][1].substring(0, 1))
+                                    && (dateCheck(ddateS, ddateE, cdateInit)
+                                    || singleDateCheck(cdateInit, oneDateCheck)))
+                                    || splitter[i][1].equals("*")
+                                    || splitter[j][1].equals("*"))
+                                    || splitter[i][2].equals(splitter[j][2].substring(0, 2))
+                                    && ((splitter[i][2].equals(splitter[j][2].substring(0, 1))
+                                    || splitter[i][2].equals("*")
+                                    || splitter[j][2].equals("*")))) {
+                                count++;
+                                sum += Integer.parseInt(splitter[j][splitter[j].length - 1]);
+                                continue;
+                            }
                         }
 
                         if (splitter[i][1].equals(splitter[j][1])
