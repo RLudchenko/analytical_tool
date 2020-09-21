@@ -40,7 +40,7 @@ public class Parser {
     }
 
     private static void parser(String[][] splitter) {
-        final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 
         for (int i = 0; i < splitter.length; i++) {
             int sum = 0;
@@ -66,20 +66,23 @@ public class Parser {
                     if (queryDate.contains("-")) {
                         String[] queryDateGap = queryDate.split("-");
 
-                        LocalDate[] timeGap = { LocalDate.parse(queryDateGap[0], FORMATTER),
-                                LocalDate.parse(queryDateGap[1], FORMATTER)};
-                        LocalDate timeLineTime = LocalDate.parse(splitter[j][splitter[j].length - 2], FORMATTER);
+                        LocalDate[] timeGap = { LocalDate.parse(queryDateGap[0], formatter),
+                                LocalDate.parse(queryDateGap[1], formatter)};
+                        LocalDate timeLineTime
+                                = LocalDate.parse(splitter[j][splitter[j].length - 2], formatter);
 
                         if (timeLineTime.isBefore(timeGap[0]) || timeLineTime.isAfter(timeGap[1])) {
-                            continue queryCompare;
+                            continue;
                         }
 
                     } else {
-                        LocalDate queryTime = LocalDate.parse(queryDate, FORMATTER);
-                        LocalDate timeLineTime = LocalDate.parse(splitter[j][splitter[j].length - 2], FORMATTER);
+                        LocalDate queryTime
+                                = LocalDate.parse(queryDate, formatter);
+                        LocalDate timeLineTime
+                                = LocalDate.parse(splitter[j][splitter[j].length - 2], formatter);
 
                         if (!queryTime.isEqual(timeLineTime)) {
-                            continue queryCompare;
+                            continue;
                         }
                     }
 
