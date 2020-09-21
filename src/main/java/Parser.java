@@ -7,11 +7,12 @@ import java.time.format.DateTimeFormatter;
 
 public class Parser {
     public static void main(String[] args) {
-        String path = "D:\\analytical_tool\\data.txt";
-        readFromFile(path);
+        String path = "D:\\analytical_tool\\src\\main\\resources\\data.txt";
+        String[][] splitter = readFromFile(path);
+        parser(splitter);
     }
 
-    public static void readFromFile(String path) {
+    private static String[][] readFromFile(String path) {
         String line = "";
 
         String[][] splitter = new String[7][6];
@@ -32,98 +33,66 @@ public class Parser {
                 line = reader.readLine();
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("An error has occurred: " + e);
         }
+
+        return splitter;
+    }
+
+    private static void parser(String[][] splitter) {
+        final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 
         for (int i = 0; i < splitter.length; i++) {
             int sum = 0;
             int count = 0;
-            int average;
-
-            String dateDStart = "";
-            String dateDEnd = "";
-            String dateC = "";
-            String oneDateCheckD = "";
-
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-
-            LocalDate ddateS = LocalDate.now();
-            LocalDate ddateE = LocalDate.now();
-            LocalDate oneDateCheck = LocalDate.now();
-            LocalDate cdateInit;
-
-            if (splitter[i][0] == null) {
-                break;
-            }
-
             if (splitter[i][0].contains("D")) {
+                queryCompare:
                 for (int j = 0; j < i; j++) {
-                    if (splitter[i][4].contains("-")) {
-                        String[] split = splitter[i][4].split("-");
-                        for (int k = 0; k < split.length; k++) {
-                            dateDStart = split[0];
-                            ddateS = LocalDate.parse(dateDStart, formatter);
-                            dateDEnd = split[1];
-                            ddateE = LocalDate.parse(dateDEnd, formatter);
+                    if (!splitter[j][0].contains("C")) {
+                        continue;
+                    }
+
+                    for (int k = 1; k < splitter[i].length - 2; k++) {
+                        if (splitter[j][k].equals("*") || splitter[i][k].equals("*")) {
+                            continue;
                         }
+
+                        if (!splitter[j][k].matches("^" + splitter[i][k] + "(.*)")) {
+                            continue queryCompare;
+                        }
+                    }
+
+                    String queryDate = splitter[i][splitter[i].length - 1];
+                    if (queryDate.contains("-")) {
+                        String[] queryDateGap = queryDate.split("-");
+
+                        LocalDate[] timeGap = { LocalDate.parse(queryDateGap[0], FORMATTER),
+                                LocalDate.parse(queryDateGap[1], FORMATTER)};
+                        LocalDate timeLineTime = LocalDate.parse(splitter[j][splitter[j].length - 2], FORMATTER);
+
+                        if (timeLineTime.isBefore(timeGap[0]) || timeLineTime.isAfter(timeGap[1])) {
+                            continue queryCompare;
+                        }
+
                     } else {
-                        oneDateCheckD = splitter[i][4];
-                        oneDateCheck = LocalDate.parse(oneDateCheckD, formatter);
-                    }
+                        LocalDate queryTime = LocalDate.parse(queryDate, FORMATTER);
+                        LocalDate timeLineTime = LocalDate.parse(splitter[j][splitter[j].length - 2], FORMATTER);
 
-                    if (splitter[j][0].contains("C")) {
-                        dateC = splitter[j][4];
-                        cdateInit = LocalDate.parse(dateC, formatter);
-
-                        if (splitter[j][2].length() > 1) {
-                            if (!dateCheck(ddateS, ddateE, cdateInit)
-                                    && !singleDateCheck(cdateInit, oneDateCheck)) {
-                                continue;
-                            }
-
-                            if ((splitter[i][1].equals(splitter[j][1].substring(0, 1))
-                                    || splitter[i][1].equals("*")
-                                    || splitter[j][1].equals("*"))
-                                    || splitter[i][2].equals(splitter[j][2].substring(0, 2))
-                                    && ((splitter[i][2].equals(splitter[j][2].substring(0, 1))
-                                    || splitter[i][2].equals("*")
-                                    || splitter[j][2].equals("*")))) {
-                                count++;
-                                sum += Integer.parseInt(splitter[j][splitter[j].length - 1]);
-                                continue;
-                            }
-                        }
-
-                        if (splitter[i][1].equals(splitter[j][1])
-                                && splitter[i][2].equals(splitter[j][2].substring(0, 1))
-                                && dateCheck(ddateS, ddateE, cdateInit)) {
-                            count++;
-                            sum += Integer.parseInt(splitter[j][splitter[j].length - 1]);
+                        if (!queryTime.isEqual(timeLineTime)) {
+                            continue queryCompare;
                         }
                     }
+
+                    sum += Integer.parseInt(splitter[j][splitter[j].length - 1]);
+                    count++;
                 }
 
-                if (count > 1) {
-                    average = sum / count;
-                    System.out.println(average);
-                } else if (sum == 0) {
-                    System.out.println("-");
+                if (count > 0) {
+                    System.out.println(sum / count);
                 } else {
-                    System.out.println(sum);
+                    System.out.println("-");
                 }
             }
         }
-    }
-
-    public static boolean dateCheck(LocalDate ddateS, LocalDate ddateE, LocalDate cdateInit) {
-        if (ddateS.compareTo(cdateInit) * cdateInit.compareTo(ddateE) > 0) {
-            return true;
-        } else {
-            return cdateInit.equals(ddateS) || cdateInit.equals(ddateE);
-        }
-    }
-
-    public static boolean singleDateCheck(LocalDate cdateInit, LocalDate oneDateCheck) {
-        return cdateInit.equals(oneDateCheck);
     }
 }
