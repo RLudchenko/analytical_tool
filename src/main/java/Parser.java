@@ -1,47 +1,22 @@
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 public class Parser {
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+
     public static void main(String[] args) {
-        String path = "D:\\analytical_tool\\src\\main\\resources\\data.txt";
-        String[][] splitter = readFromFile(path);
-        parser(splitter);
+        Parser parser = new Parser();
+        parser.run();
     }
 
-    private static String[][] readFromFile(String path) {
-        String line = "";
-
-        String[][] splitter = new String[7][6];
-        int currentLine = 0;
-
-        try {
-            File file = new File(path);
-            FileReader fr = new FileReader(file);
-            BufferedReader reader = new BufferedReader(fr);
-
-            reader.readLine();
-
-            line = reader.readLine();
-
-            while (line != null) {
-                splitter[currentLine] = line.split(" ");
-                currentLine++;
-                line = reader.readLine();
-            }
-        } catch (IOException e) {
-            System.out.println("An error has occurred: " + e);
-        }
-
-        return splitter;
+    private void run() {
+        String path = "src\\main\\resources\\data.txt";
+        String[][] splitter = ReadFromFile.readFromFile(path);
+        Parser parser = new Parser();
+        parser.parser(splitter);
     }
 
-    private static void parser(String[][] splitter) {
-        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-
+    private void parser(String[][] splitter) {
         for (int i = 0; i < splitter.length; i++) {
             int sum = 0;
             int count = 0;
@@ -66,20 +41,19 @@ public class Parser {
                     if (queryDate.contains("-")) {
                         String[] queryDateGap = queryDate.split("-");
 
-                        LocalDate[] timeGap = { LocalDate.parse(queryDateGap[0], formatter),
-                                LocalDate.parse(queryDateGap[1], formatter)};
+                        LocalDate[] timeGap = { LocalDate.parse(queryDateGap[0], FORMATTER),
+                                LocalDate.parse(queryDateGap[1], FORMATTER)};
                         LocalDate timeLineTime
-                                = LocalDate.parse(splitter[j][splitter[j].length - 2], formatter);
+                                = LocalDate.parse(splitter[j][splitter[j].length - 2], FORMATTER);
 
                         if (timeLineTime.isBefore(timeGap[0]) || timeLineTime.isAfter(timeGap[1])) {
                             continue;
                         }
-
                     } else {
                         LocalDate queryTime
-                                = LocalDate.parse(queryDate, formatter);
+                                = LocalDate.parse(queryDate, FORMATTER);
                         LocalDate timeLineTime
-                                = LocalDate.parse(splitter[j][splitter[j].length - 2], formatter);
+                                = LocalDate.parse(splitter[j][splitter[j].length - 2], FORMATTER);
 
                         if (!queryTime.isEqual(timeLineTime)) {
                             continue;
@@ -90,12 +64,16 @@ public class Parser {
                     count++;
                 }
 
-                if (count > 0) {
-                    System.out.println(sum / count);
-                } else {
-                    System.out.println("-");
-                }
+                calculateResult(count, sum);
             }
+        }
+    }
+
+    private void calculateResult(int count, int sum) {
+        if (count > 0) {
+            System.out.println(sum / count);
+        } else {
+            System.out.println("-");
         }
     }
 }
