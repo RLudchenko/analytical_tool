@@ -3,7 +3,7 @@ import java.io.File;
 import java.io.IOException;
 
 public class ReadFromFile {
-    public static String[][] readFromFile(String path) {
+    public String[][] readFromFile(String path) {
         String line = "";
 
         String[][] splitter = new String[7][6];

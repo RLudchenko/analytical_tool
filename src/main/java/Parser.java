@@ -2,16 +2,14 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 public class Parser {
+    private final String waitingTimeLine = "C";
+    private final String query = "D";
+    private final String anyMatch = "*";
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 
-    public static void main(String[] args) {
-        Parser parser = new Parser();
-        parser.run();
-    }
-
-    private void run() {
-        String path = "src\\main\\resources\\data.txt";
-        String[][] splitter = ReadFromFile.readFromFile(path);
+    public void run(String path) {
+        ReadFromFile fileReader = new ReadFromFile();
+        String[][] splitter = fileReader.readFromFile(path);
         Parser parser = new Parser();
         parser.parser(splitter);
     }
@@ -20,15 +18,15 @@ public class Parser {
         for (int i = 0; i < splitter.length; i++) {
             int sum = 0;
             int count = 0;
-            if (splitter[i][0].contains("D")) {
+            if (splitter[i][0].contains(query)) {
                 queryCompare:
                 for (int j = 0; j < i; j++) {
-                    if (!splitter[j][0].contains("C")) {
+                    if (!splitter[j][0].contains(waitingTimeLine)) {
                         continue;
                     }
 
                     for (int k = 1; k < splitter[i].length - 2; k++) {
-                        if (splitter[j][k].equals("*") || splitter[i][k].equals("*")) {
+                        if (splitter[j][k].equals("anyMatch") || splitter[i][k].equals("anyMatch")) {
                             continue;
                         }
 
