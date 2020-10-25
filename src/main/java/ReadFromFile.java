@@ -1,3 +1,4 @@
+import exceptions.ReadFromFileException;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -27,8 +28,10 @@ public class ReadFromFile {
                 currentLine++;
                 line = reader.readLine();
             }
+
+            reader.close();
         } catch (IOException e) {
-            System.out.println("An error has occurred: " + e);
+            throw new ReadFromFileException("Can't read data from file " + path + ": ", e);
         }
 
         return splitter;
