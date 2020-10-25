@@ -4,9 +4,6 @@ import java.time.format.DateTimeFormatter;
 public class Parser {
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy");
     private static final int POSITION_OF_WAITING_TIME = 5;
-    private final String waitingTimeLine = "C";
-    private final String query = "D";
-    private final String anyMatch = "*";
     private String[][] dataLine = null;
 
     public boolean run(String path) {
@@ -21,6 +18,7 @@ public class Parser {
         String[] currentDataLine;
         for (int i = 0; i < splitter.length; i++) {
             currentDataLine = splitter[i];
+            String query = "D";
             if (isQuery(currentDataLine, query)) {
                 calculateAverageWaitingTimeOfQuery(i, currentDataLine);
             }
@@ -48,6 +46,7 @@ public class Parser {
     }
 
     private boolean isDataLineRefersToQuery(String[] currentQuery, String[] currentDataLine) {
+        String waitingTimeLine = "C";
         return currentDataLine[0].equals(waitingTimeLine)
                 && serviceCheck(currentQuery, currentDataLine)
                 && questionType(currentQuery, currentDataLine)
@@ -77,6 +76,7 @@ public class Parser {
     }
 
     private boolean serviceCheck(String[] currentQuery, String[] currentDataLine) {
+        String anyMatch = "*";
         if (currentQuery[1].equals(anyMatch)) {
             return true;
         }
