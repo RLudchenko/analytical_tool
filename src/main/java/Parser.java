@@ -12,16 +12,16 @@ public class Parser {
     public boolean run(String path) {
         ReadFromFile fileReader = new ReadFromFile();
         String[][] splitter = fileReader.readFromFile(path);
-        Parser parser = new Parser();
-        return parser.parser(splitter);
+        Parser parsing = new Parser();
+        return parsing.parser(splitter);
     }
 
-    private boolean parser(String[][] splitter) {
+    public boolean parser(String[][] splitter) {
         dataLine = splitter;
         String[] currentDataLine;
         for (int i = 0; i < splitter.length; i++) {
             currentDataLine = splitter[i];
-            if (isQuery(currentDataLine, "D")) {
+            if (isQuery(currentDataLine, query)) {
                 calculateAverageWaitingTimeOfQuery(i, currentDataLine);
             }
         }
@@ -48,7 +48,7 @@ public class Parser {
     }
 
     private boolean isDataLineRefersToQuery(String[] currentQuery, String[] currentDataLine) {
-        return currentDataLine[0].equals("C")
+        return currentDataLine[0].equals(waitingTimeLine)
                 && serviceCheck(currentQuery, currentDataLine)
                 && questionType(currentQuery, currentDataLine)
                 && dateCheck(currentQuery, currentDataLine);
@@ -77,7 +77,7 @@ public class Parser {
     }
 
     private boolean serviceCheck(String[] currentQuery, String[] currentDataLine) {
-        if (currentQuery[1].equals("*")) {
+        if (currentQuery[1].equals(anyMatch)) {
             return true;
         }
 
@@ -122,7 +122,7 @@ public class Parser {
         return currentOperation[0].equals(operationType);
     }
 
-    private String calculateResult(int count, int sum) {
+    public String calculateResult(int count, int sum) {
         String out = null;
         if (count > 0) {
             out = Integer.toString(sum / count);
