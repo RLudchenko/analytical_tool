@@ -2,11 +2,11 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 public class Parser {
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy");
     private static final int POSITION_OF_WAITING_TIME = 5;
     private final String waitingTimeLine = "C";
     private final String query = "D";
     private final String anyMatch = "*";
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy");
     private String[][] dataLine = null;
 
     public boolean run(String path) {
@@ -19,7 +19,7 @@ public class Parser {
     private boolean parser(String[][] splitter) {
         dataLine = splitter;
         String[] currentDataLine;
-        for(int i = 0; i < splitter.length; i++) {
+        for (int i = 0; i < splitter.length; i++) {
             currentDataLine = splitter[i];
             if (isQuery(currentDataLine, "D")) {
                 calculateAverageWaitingTimeOfQuery(i, currentDataLine);
@@ -28,122 +28,108 @@ public class Parser {
         return true;
     }
 
-    private boolean calculateAverageWaitingTimeOfQuery(int currentQueryPosition, String[] currentQuery) {
-       int countQuestionOfQuery = 0;
-       int sumOfWaitingTime = 0;
+    private boolean calculateAverageWaitingTimeOfQuery(int currentQueryPosition,
+                                                       String[] currentQuery) {
+        int countQuestionOfQuery = 0;
+        int sumOfWaitingTime = 0;
 
-       String[] currentDataLine;
+        String[] currentDataLine;
 
-       for (int i = 0; i < currentQueryPosition; i++) {
-           currentDataLine = dataLine[i];
-           if (isDataLineRefersToQuery(currentQuery, currentDataLine)) {
-               countQuestionOfQuery++;
-               sumOfWaitingTime += Integer.parseInt(currentDataLine[POSITION_OF_WAITING_TIME]);
-           }
-       }
-
-       calculateResult(countQuestionOfQuery, sumOfWaitingTime);
-       return true;
-    }
-
-    private boolean isDataLineRefersToQuery(String[] currentQuery, String[] currentDataLine) {
-        return  currentDataLine[0].equals("C")
-                && categoryCheck(currentQuery, currentDataLine)
-                && dataCheck(currentQuery, currentDataLine);
-    }
-
-    private boolean dataCheck(String[] currentQuery, String[] currentDataLine) {
-        String queryDate = currentQuery[currentQuery.length - 1];
-        String timeLineDate = currentDataLine[currentDataLine.length - 2];
-
-        if (queryDate.contains("-")) {
-            String[] dateGap = queryDate.split("-");
-
-            LocalDate timeLineTime
-                    = LocalDate.parse(timeLineDate, FORMATTER);
-            LocalDate[] timeGap = {LocalDate.parse(dateGap[0], FORMATTER),
-                    LocalDate.parse(dateGap[1], FORMATTER)};
-
-            return !timeLineTime.isBefore(timeGap[0])
-                    && !timeLineTime.isAfter(timeGap[1]);
+        for (int i = 0; i < currentQueryPosition; i++) {
+            currentDataLine = dataLine[i];
+            if (isDataLineRefersToQuery(currentQuery, currentDataLine)) {
+                countQuestionOfQuery++;
+                sumOfWaitingTime += Integer.parseInt(currentDataLine[POSITION_OF_WAITING_TIME]);
+            }
         }
 
-
-        LocalDate regularWaitingTimeLine
-                = LocalDate.parse(timeLineDate, FORMATTER);
-        LocalDate regularQueryTimeLine
-                = LocalDate.parse(queryDate, FORMATTER);
-
-        return regularQueryTimeLine.isEqual(regularWaitingTimeLine);
-    }
-
-    private boolean categoryCheck(String[] currentQuery, String[] currentDataLine) {
+        calculateResult(countQuestionOfQuery, sumOfWaitingTime);
         return true;
     }
 
+    private boolean isDataLineRefersToQuery(String[] currentQuery, String[] currentDataLine) {
+        return currentDataLine[0].equals("C")
+                && serviceCheck(currentQuery, currentDataLine)
+                && questionType(currentQuery, currentDataLine)
+                && dateCheck(currentQuery, currentDataLine);
+    }
+
+    private boolean dateCheck(String[] currentQuery, String[] currentDataLine) {
+        String queryDateStr = currentQuery[currentQuery.length - 1];
+        String timeLineDateStr = currentDataLine[currentDataLine.length - 2];
+
+        LocalDate dataLineTime
+                = LocalDate.parse(timeLineDateStr, FORMATTER);
+
+        if (queryDateStr.contains("-")) {
+            String[] dateGap = queryDateStr.split("-");
+            LocalDate[] timeGap = {LocalDate.parse(dateGap[0], FORMATTER),
+                    LocalDate.parse(dateGap[1], FORMATTER)};
+
+            return !dataLineTime.isBefore(timeGap[0])
+                    && !dataLineTime.isAfter(timeGap[1]);
+        }
+
+        LocalDate queryTime
+                = LocalDate.parse(queryDateStr, FORMATTER);
+
+        return queryTime.isEqual(dataLineTime);
+    }
+
+    private boolean serviceCheck(String[] currentQuery, String[] currentDataLine) {
+        if (currentQuery[1].equals("*")) {
+            return true;
+        }
+
+        String[] serviceOfQuery = currentQuery[1].split("\\.");
+        String[] serviceOfDataLine = currentDataLine[1].split("\\.");
+
+        if (serviceOfQuery.length > serviceOfDataLine.length) {
+            return false;
+        }
+
+        for (int i = 0; i < serviceOfQuery.length; i++) {
+            if (!serviceOfQuery[i].equals(serviceOfDataLine[i])) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private boolean questionType(String[] currentQuery, String[] currentDataLine) {
+        if (currentQuery[2].equals("*")) {
+            return true;
+        }
+
+        String[] questionTypeOfQuery = currentQuery[2].split("\\.");
+        String[] questionTypeOfDataLine = currentDataLine[2].split("\\.");
+
+        if (questionTypeOfQuery.length > questionTypeOfDataLine.length) {
+            return false;
+        }
+
+        for (int i = 0; i < questionTypeOfQuery.length; i++) {
+            if (!questionTypeOfQuery[i].equals(questionTypeOfDataLine[i])) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 
     private boolean isQuery(String[] currentOperation, String operationType) {
         return currentOperation[0].equals(operationType);
     }
 
-//    private void parserht(String[][] splitter) {
-//        for (int i = 0; i < splitter.length; i++) {
-//            int sum = 0;
-//            int count = 0;
-//            if (splitter[i][0].contains(query)) {
-//                queryCompare:
-//                for (int j = 0; j < i; j++) {
-//                    if (!splitter[j][0].contains(waitingTimeLine)) {
-//                        continue;
-//                    }
-//
-//                    for (int k = 1; k < splitter[i].length - 2; k++) {
-//                        if (splitter[j][k].equals("anyMatch") || splitter[i][k].equals("anyMatch")) {
-//                            continue;
-//                        }
-//
-//                        if (!splitter[j][k].matches("^" + splitter[i][k] + "(.*)")) {
-//                            continue queryCompare;
-//                        }
-//                    }
-//
-//                    String queryDate = splitter[i][splitter[i].length - 1];
-//                    if (queryDate.contains("-")) {
-//                        String[] queryDateGap = queryDate.split("-");
-//
-//                        LocalDate[] timeGap = { LocalDate.parse(queryDateGap[0], FORMATTER),
-//                                LocalDate.parse(queryDateGap[1], FORMATTER)};
-//                        LocalDate timeLineTime
-//                                = LocalDate.parse(splitter[j][splitter[j].length - 2], FORMATTER);
-//
-//                        if (timeLineTime.isBefore(timeGap[0]) || timeLineTime.isAfter(timeGap[1])) {
-//                            continue;
-//                        }
-//                    } else {
-//                        LocalDate queryTime
-//                                = LocalDate.parse(queryDate, FORMATTER);
-//                        LocalDate timeLineTime
-//                                = LocalDate.parse(splitter[j][splitter[j].length - 2], FORMATTER);
-//
-//                        if (!queryTime.isEqual(timeLineTime)) {
-//                            continue;
-//                        }
-//                    }
-//
-//                    sum += Integer.parseInt(splitter[j][splitter[j].length - 1]);
-//                    count++;
-//                }
-//
-//                calculateResult(count, sum);
-//            }
-//        }
-//    }
-
-    private void calculateResult(int count, int sum) {
+    private String calculateResult(int count, int sum) {
+        String out = null;
         if (count > 0) {
-            System.out.println(sum / count);
+            out = Integer.toString(sum / count);
         } else {
-            System.out.println("-");
+            out = "-";
         }
+        System.out.println(out);
+        return out;
     }
 }
