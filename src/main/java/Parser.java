@@ -42,6 +42,7 @@ public class Parser {
         }
 
         calculateResult(countQuestionOfQuery, sumOfWaitingTime);
+
         return true;
     }
 
