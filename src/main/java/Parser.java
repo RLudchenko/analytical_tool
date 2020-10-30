@@ -1,98 +1,127 @@
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 public class Parser {
-    public static void main(String[] args) throws IOException, ParseException {
-        String line = "";
-        String path = "D:\\analytical_tool\\data.txt";
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+    private static final int POSITION_OF_WAITING_TIME = 5;
+    private String[][] dataLine = null;
 
-        String[][] splitter = new String[7][6];
-        int currentLine = 0;
+    public boolean run(String path) {
+        ReadFromFile fileReader = new ReadFromFile();
+        String[][] splitter = fileReader.readFromFile(path);
+        Parser parsing = new Parser();
+        return parsing.parser(splitter);
+    }
 
-        try {
-            File file = new File(path);
-            FileReader fr = new FileReader(file);
-            BufferedReader reader = new BufferedReader(fr);
-
-            reader.readLine();
-
-            line = reader.readLine();
-
-            while (line != null) {
-                splitter[currentLine] = line.split(" ");
-                currentLine++;
-                line = reader.readLine();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
+    public boolean parser(String[][] splitter) {
+        dataLine = splitter;
+        String[] currentDataLine;
         for (int i = 0; i < splitter.length; i++) {
-            int sum = 0;
-            int count = 0;
-            int average;
-
-            String dateDStart = "";
-            String dateDEnd = "";
-            String dateC = "";
-
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-
-            LocalDate ddateS = LocalDate.now();
-            LocalDate ddateE = LocalDate.now();
-            LocalDate cdateInit;
-
-            if (splitter[i][0].contains("D")) {
-                for (int j = 0; j < i; j++) {
-                    if (splitter[i][4].contains("-")) {
-                        String[] split = splitter[i][4].split("-");
-                        for (int k = 0; k < split.length; k++) {
-                            dateDStart = split[0];
-                            ddateS = LocalDate.parse(dateDStart, formatter);
-                            dateDEnd = split[1];
-                            ddateE = LocalDate.parse(dateDEnd, formatter);
-                        }
-                    }
-
-                    if (splitter[j][0].contains("C")) {
-                        dateC = splitter[j][4];
-                        cdateInit = LocalDate.parse(dateC, formatter);
-                        if ((splitter[i][1].equals(splitter[j][1].substring(0, 1))
-                                || splitter[i][1].equals("*")
-                                || splitter[j][1].equals("*"))
-                                && (splitter[i][2].equals(splitter[j][2].substring(0, 1))
-                                || splitter[i][2].equals("*")
-                                || splitter[j][2].equals("*"))
-                                && ddateS.compareTo(cdateInit) * cdateInit.compareTo(ddateE) > 0) {
-                            count++;
-                            sum += Integer.parseInt(splitter[j][splitter[j].length - 1]);
-                            continue;
-                        }
-
-                        if (splitter[i][1].equals(splitter[j][1])
-                                && splitter[i][2].equals(splitter[j][2].substring(0, 1))) {
-                            count++;
-                            sum += Integer.parseInt(splitter[j][splitter[j].length - 1]);
-                        }
-                    }
-                }
-
-                if (count > 1) {
-                    average = sum / count;
-                    System.out.println(average);
-                } else if (sum == 0) {
-                    System.out.println("-");
-                } else {
-                    System.out.println(sum);
-                }
+            currentDataLine = splitter[i];
+            String query = "D";
+            if (isQuery(currentDataLine, query)) {
+                calculateAverageWaitingTimeOfQuery(i, currentDataLine);
             }
         }
+        return true;
+    }
+
+    private boolean calculateAverageWaitingTimeOfQuery(int currentQueryPosition,
+                                                       String[] currentQuery) {
+        int countQuestionOfQuery = 0;
+        int sumOfWaitingTime = 0;
+        String[] currentDataLine;
+        for (int i = 0; i < currentQueryPosition; i++) {
+            currentDataLine = dataLine[i];
+            if (isDataLineRefersToQuery(currentQuery, currentDataLine)) {
+                countQuestionOfQuery++;
+                sumOfWaitingTime += Integer.parseInt(currentDataLine[POSITION_OF_WAITING_TIME]);
+            }
+        }
+        calculateResult(countQuestionOfQuery, sumOfWaitingTime);
+        return true;
+    }
+
+    private boolean isDataLineRefersToQuery(String[] currentQuery, String[] currentDataLine) {
+        String waitingTimeLine = "C";
+        return currentDataLine[0].equals(waitingTimeLine)
+                && serviceCheck(currentQuery, currentDataLine)
+                && questionType(currentQuery, currentDataLine)
+                && dateCheck(currentQuery, currentDataLine);
+    }
+
+    private boolean dateCheck(String[] currentQuery, String[] currentDataLine) {
+        String queryDateStr = currentQuery[currentQuery.length - 1];
+        String timeLineDateStr = currentDataLine[currentDataLine.length - 2];
+
+        LocalDate dataLineTime
+                = LocalDate.parse(timeLineDateStr, FORMATTER);
+
+        if (queryDateStr.contains("-")) {
+            String[] dateGap = queryDateStr.split("-");
+            LocalDate[] timeGap = {LocalDate.parse(dateGap[0], FORMATTER),
+                    LocalDate.parse(dateGap[1], FORMATTER)};
+            return !dataLineTime.isBefore(timeGap[0])
+                    && !dataLineTime.isAfter(timeGap[1]);
+        }
+        LocalDate queryTime
+                = LocalDate.parse(queryDateStr, FORMATTER);
+        return queryTime.isEqual(dataLineTime);
+    }
+
+    private boolean serviceCheck(String[] currentQuery, String[] currentDataLine) {
+        String anyMatch = "*";
+        if (currentQuery[1].equals(anyMatch)) {
+            return true;
+        }
+
+        String[] serviceOfQuery = currentQuery[1].split("\\.");
+        String[] serviceOfDataLine = currentDataLine[1].split("\\.");
+
+        if (serviceOfQuery.length > serviceOfDataLine.length) {
+            return false;
+        }
+
+        for (int i = 0; i < serviceOfQuery.length; i++) {
+            if (!serviceOfQuery[i].equals(serviceOfDataLine[i])) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean questionType(String[] currentQuery, String[] currentDataLine) {
+        if (currentQuery[2].equals("*")) {
+            return true;
+        }
+
+        String[] questionTypeOfQuery = currentQuery[2].split("\\.");
+        String[] questionTypeOfDataLine = currentDataLine[2].split("\\.");
+
+        if (questionTypeOfQuery.length > questionTypeOfDataLine.length) {
+            return false;
+        }
+
+        for (int i = 0; i < questionTypeOfQuery.length; i++) {
+            if (!questionTypeOfQuery[i].equals(questionTypeOfDataLine[i])) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean isQuery(String[] currentOperation, String operationType) {
+        return currentOperation[0].equals(operationType);
+    }
+
+    public String calculateResult(int count, int sum) {
+        String result = null;
+        if (count > 0) {
+            result = Integer.toString(sum / count);
+        } else {
+            result = "-";
+        }
+        System.out.println(result);
+        return result;
     }
 }
-
-
