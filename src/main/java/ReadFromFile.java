@@ -1,6 +1,7 @@
 import exceptions.ReadFromFileException;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 
 public class ReadFromFile {
@@ -14,13 +15,10 @@ public class ReadFromFile {
 
         try {
             File file = new File(path);
-            java.io.FileReader fileReader = new java.io.FileReader(file);
+            FileReader fileReader = new FileReader(file);
             BufferedReader reader = new BufferedReader(fileReader);
-
             numberOfLines = Integer.parseInt(reader.readLine());
-
             splitter = new String[numberOfLines][MAX_NUMBER_OF_ELEMENTS_IN_LINE];
-
             line = reader.readLine();
 
             while (line != null) {
@@ -28,12 +26,10 @@ public class ReadFromFile {
                 currentLine++;
                 line = reader.readLine();
             }
-
             reader.close();
         } catch (IOException e) {
             throw new ReadFromFileException("Can't read data from file " + path + ": ", e);
         }
-
         return splitter;
     }
 }

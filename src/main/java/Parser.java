@@ -30,9 +30,7 @@ public class Parser {
                                                        String[] currentQuery) {
         int countQuestionOfQuery = 0;
         int sumOfWaitingTime = 0;
-
         String[] currentDataLine;
-
         for (int i = 0; i < currentQueryPosition; i++) {
             currentDataLine = dataLine[i];
             if (isDataLineRefersToQuery(currentQuery, currentDataLine)) {
@@ -40,9 +38,7 @@ public class Parser {
                 sumOfWaitingTime += Integer.parseInt(currentDataLine[POSITION_OF_WAITING_TIME]);
             }
         }
-
         calculateResult(countQuestionOfQuery, sumOfWaitingTime);
-
         return true;
     }
 
@@ -65,14 +61,11 @@ public class Parser {
             String[] dateGap = queryDateStr.split("-");
             LocalDate[] timeGap = {LocalDate.parse(dateGap[0], FORMATTER),
                     LocalDate.parse(dateGap[1], FORMATTER)};
-
             return !dataLineTime.isBefore(timeGap[0])
                     && !dataLineTime.isAfter(timeGap[1]);
         }
-
         LocalDate queryTime
                 = LocalDate.parse(queryDateStr, FORMATTER);
-
         return queryTime.isEqual(dataLineTime);
     }
 
@@ -94,7 +87,6 @@ public class Parser {
                 return false;
             }
         }
-
         return true;
     }
 
@@ -115,7 +107,6 @@ public class Parser {
                 return false;
             }
         }
-
         return true;
     }
 
@@ -124,13 +115,13 @@ public class Parser {
     }
 
     public String calculateResult(int count, int sum) {
-        String out = null;
+        String result = null;
         if (count > 0) {
-            out = Integer.toString(sum / count);
+            result = Integer.toString(sum / count);
         } else {
-            out = "-";
+            result = "-";
         }
-        System.out.println(out);
-        return out;
+        System.out.println(result);
+        return result;
     }
 }

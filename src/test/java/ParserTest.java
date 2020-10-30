@@ -1,10 +1,14 @@
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.File;
+
 public class ParserTest {
     private final Parser parser = new Parser();
-    private final String PATH = "src\\main\\resources\\Data.txt";
-    private final String MOCK_PATH = "src\\main\\resources\\MockData.txt";
+    private final String PATH = "src\\test\\resources\\Data.txt"
+            .replaceAll("\\{2}", File.separator);
+    private final String MOCK_PATH = "src\\test\\resources\\MockData.txt"
+            .replaceAll("\\{2}", File.separator);
     private final ReadFromFile fileReader = new ReadFromFile();
     private final ReadFromFile mockFileReader = new ReadFromFile();
     String[][] splitter = fileReader.readFromFile(PATH);
@@ -15,7 +19,7 @@ public class ParserTest {
         Assert.assertTrue(parser.run(PATH));
     }
 
-    @Test
+    @Test 
     public void parserTest() {
         Assert.assertTrue(parser.parser(splitter));
     }
